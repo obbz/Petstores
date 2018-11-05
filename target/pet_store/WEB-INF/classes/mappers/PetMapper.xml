@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nf147.ojp.dao.PetMapper">
+  <resultMap id="BaseResultMap" type="com.nf147.ojp.entity.Pet">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="photo_urls" jdbcType="VARCHAR" property="photo_urls" />
+    <result column="status" jdbcType="VARCHAR" property="status" />
+    <association property="category"  javaType="com.nf147.ojp.entity.Category" >
+      <id column="gid" property="id"/>
+      <result column="gname" property="name"/>
+    </association>
+    <association property="tag" javaType="com.nf147.ojp.entity.Tag" >
+      <id column="tid" property="id"/>
+      <result column="tname" property="name"/>
+    </association>
+  </resultMap>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from pet
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.nf147.ojp.entity.Pet" useGeneratedKeys="true" keyColumn="id">
+    insert into pet (category_id, name,
+       tag_id, status
+      )
+    values (#{category_id,jdbcType=INTEGER}, #{name,jdbcType=VARCHAR},
+      #{tag_id,jdbcType=INTEGER}, #{status,jdbcType=VARCHAR}
+      )
+  </insert>
+
+  <update id="updateByPrimaryKey" parameterType="com.nf147.ojp.entity.Pet">
+    update pet
+    set category_id = #{category_id,jdbcType=INTEGER},
+      name = #{name,jdbcType=VARCHAR},
+      tag_id = #{tag_id,jdbcType=INTEGER},
+      status = #{status,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <update id="upLoadImg">
+    update pet
+    set photo_urls = #{photo_urls,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <sql id="petInfo">
+    p.id, g.id as gid,g.name as gname, p.name, p.photo_urls, t.id as tid,t.name as tname, p.status
+    from pet p inner join category g on g.id = p.category_id
+    inner join tag t on t.id = p.tag_id
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select <include refid="petInfo"/>
+    where p.id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <select id="selectAll" resultMap="BaseResultMap">
+    select <include refid="petInfo"/>
+  </select>
+
+  <select id="selectByStatus" resultMap="BaseResultMap" parameterType="string">
+    select <include refid="petInfo"/>
+    where p.status = #{status}
+  </select>
+
+</mapper>
